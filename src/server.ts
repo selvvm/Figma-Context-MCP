@@ -1,11 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { FigmaService } from "./services/figma";
+import { FigmaService } from "./services/figma.js";
 import express, { Request, Response } from "express";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { IncomingMessage, ServerResponse } from "http";
 import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
-import { SimplifiedDesign } from "./services/simplify-node-response";
+import { SimplifiedDesign } from "./services/simplify-node-response.js";
 
 export const Logger = {
   log: (...args: any[]) => {},
@@ -22,7 +22,7 @@ export class FigmaMcpServer {
     this.server = new McpServer(
       {
         name: "Figma MCP Server",
-        version: "0.1.9",
+        version: "0.1.12",
       },
       {
         capabilities: {
@@ -89,6 +89,7 @@ export class FigmaMcpServer {
         } catch (error) {
           Logger.error(`Error fetching file ${fileKey}:`, error);
           return {
+            isError: true,
             content: [{ type: "text", text: `Error fetching file: ${error}` }],
           };
         }
@@ -161,6 +162,7 @@ export class FigmaMcpServer {
         } catch (error) {
           Logger.error(`Error downloading images from file ${fileKey}:`, error);
           return {
+            isError: true,
             content: [{ type: "text", text: `Error downloading images: ${error}` }],
           };
         }

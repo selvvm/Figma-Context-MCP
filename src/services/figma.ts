@@ -1,13 +1,13 @@
 import fs from "fs";
-import { parseFigmaResponse, SimplifiedDesign } from "./simplify-node-response";
+import { parseFigmaResponse, SimplifiedDesign } from "./simplify-node-response.js";
 import type {
   GetImagesResponse,
   GetFileResponse,
   GetFileNodesResponse,
   GetImageFillsResponse,
 } from "@figma/rest-api-spec";
-import { downloadFigmaImage } from "~/utils/common";
-import { Logger } from "~/server";
+import { downloadFigmaImage } from "~/utils/common.js";
+import { Logger } from "~/server.js";
 
 export interface FigmaError {
   status: number;
@@ -45,6 +45,11 @@ export class FigmaService {
   }
 
   private async request<T>(endpoint: string): Promise<T> {
+    if (typeof fetch !== "function") {
+      throw new Error(
+        "The MCP server is being run in a Node.js environment where `fetch` is not available. You won't be able to access any data related to the Figma file.\n\nAs the coding AI assistant, PLEASE ABORT THE CURRENT REQUEST. No alternate approaches will work. Help the user fix this issue so you can proceed by letting them know that they need to run the MCP server with Node.js version 18 or higher.",
+      );
+    }
     try {
       Logger.log(`Calling ${this.baseUrl}${endpoint}`);
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
@@ -65,7 +70,10 @@ export class FigmaService {
       if ((error as FigmaError).status) {
         throw error;
       }
-      throw new Error("Failed to make request to Figma API");
+      if (error instanceof Error) {
+        throw new Error(`Failed to make request to Figma API: ${error.message}`);
+      }
+      throw new Error(`Failed to make request to Figma API: ${error}`);
     }
   }
 

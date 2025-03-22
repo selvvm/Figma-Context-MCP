@@ -1,6 +1,14 @@
+#!/usr/bin/env node
+
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { FigmaMcpServer } from "./server";
-import { getServerConfig } from "./config";
+import { FigmaMcpServer } from "./server.js";
+import { getServerConfig } from "./config.js";
+import { resolve } from "path";
+import { config } from "dotenv";
+import { fileURLToPath } from "url";
+
+// Load .env from the current working directory
+config({ path: resolve(process.cwd(), ".env") });
 
 export async function startServer(): Promise<void> {
   // Check if we're running in stdio mode (e.g., via CLI)
@@ -19,10 +27,7 @@ export async function startServer(): Promise<void> {
   }
 }
 
-// If this file is being run directly, start the server
-if (require.main === module) {
-  startServer().catch((error) => {
-    console.error("Failed to start server:", error);
-    process.exit(1);
-  });
-}
+startServer().catch((error) => {
+  console.error("Failed to start server:", error);
+  process.exit(1);
+});
